@@ -36,7 +36,7 @@ def define_nn_mlp_model(X_train, y_train):#_ohe):
     # there are other ways to initialize the weights besides 'uniform', too
 
     model = Sequential() # sequence of layers
-    num_neurons_in_layer = 100 # number of neurons in a layer
+    num_neurons_in_layer = 10 # number of neurons in a layer
     num_inputs = X_train.shape[1] # number of features (684288)
     model.add(Dense(input_dim=num_inputs,
                      units=num_neurons_in_layer,
@@ -73,11 +73,11 @@ if __name__ == '__main__':
     # df = df[df['Pos'] != 'PG']
     # df = df[df['Pos'] != 'SG']
     df['Player_ID'] = df['Player_ID'].astype(int)
-    y = np.array(df['AST%'].values)
+    y = np.array(df['OBPM'].values)
     pid = np.array(df['Player_ID'].values)
     images = []
     for i in range(len(pid)):
-       images.append(cv2.imread('images/{0}_2016-17.png'.format(pid[i]), 0))
+       images.append(cv2.imread('thumbnails/thumbnail_{0}_2016-17.png'.format(pid[i]), 0))
     X = np.array(images)
     flat_exes = []
     for i in range(len(X)):
@@ -86,6 +86,6 @@ if __name__ == '__main__':
     X_train, y_train, X_test, y_test = load_and_condition_data() #, y_train_ohe = load_and_condition_data()
     np.random.seed(rng_seed)
     model = define_nn_mlp_model(X_train, y_train) #ohe
-    model.fit(X_train, y_train, epochs=50, batch_size=2, verbose=1,
+    model.fit(X_train, y_train, epochs=5, batch_size=2, verbose=1,
               validation_split=0.2) # cross val to estimate test error #ohe
     # print_output(model, y_train, y_test, rng_seed)

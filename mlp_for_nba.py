@@ -36,7 +36,7 @@ def define_nn_mlp_model(X_train, y_train):#_ohe):
     # there are other ways to initialize the weights besides 'uniform', too
 
     model = Sequential() # sequence of layers
-    num_neurons_in_layer = 10 # number of neurons in a layer
+    num_neurons_in_layer = 1000 # number of neurons in a layer
     num_inputs = X_train.shape[1] # number of features (684288)
     model.add(Dense(input_dim=num_inputs,
                      units=num_neurons_in_layer,
@@ -44,8 +44,8 @@ def define_nn_mlp_model(X_train, y_train):#_ohe):
     model.add(Dense(input_dim=num_neurons_in_layer,
                      units=1,
                      activation='linear')) # only 12 neurons - keep softmax at last layer
-    sgd = SGD(lr=1.0, decay=1e-7, momentum=0.95) # using stochastic gradient descent (keep)
-    model.compile(loss='msle', optimizer='adadelta', metrics=['msle'] ) # (keep)
+    sgd = SGD(lr=1.0, decay=1e-7, momentum=0.35) # using stochastic gradient descent (keep)
+    model.compile(loss='mse', optimizer='adam', metrics=['mse'] ) # (keep)
     return model
 
 def print_output(model, y_train, y_test, rng_seed):
@@ -70,8 +70,9 @@ if __name__ == '__main__':
     df = df[df['MP'] >= 1000]
     # df = df[df['Player_ID'] >= 0]
     # df = df[df['Player_ID'].duplicated()]
-    # df = df[df['Pos'] != 'PG']
+    df = df[df['Pos'] == 'C']
     # df = df[df['Pos'] != 'SG']
+    # df = df[df['Pos'] != 'SF']
     df['Player_ID'] = df['Player_ID'].astype(int)
     y = np.array(df['OBPM'].values)
     pid = np.array(df['Player_ID'].values)
@@ -86,6 +87,6 @@ if __name__ == '__main__':
     X_train, y_train, X_test, y_test = load_and_condition_data() #, y_train_ohe = load_and_condition_data()
     np.random.seed(rng_seed)
     model = define_nn_mlp_model(X_train, y_train) #ohe
-    model.fit(X_train, y_train, epochs=5, batch_size=2, verbose=1,
+    model.fit(X_train, y_train, epochs=100, batch_size=3, verbose=1,
               validation_split=0.2) # cross val to estimate test error #ohe
     # print_output(model, y_train, y_test, rng_seed)

@@ -8,9 +8,11 @@ def crop(image_path, coords, saved_location):
     cropped_image.close()
 
 if __name__ == '__main__':
-    images = listdir('images')
-    images.pop(1483)
-    for i in images:
+    hello = []
+    for i in range(len(listdir())):
+        if listdir()[i][-3:] == 'png':
+            hello.append(i)
+    for i in hello:
         print(i)
-        image = 'images/{0}'.format(i)
-        crop(image, (108, 95, 779, 694), '{0}'.format(i))
+        image = '{0}'.format(listdir()[hello[i]])
+        crop(image, (108, 95, 779, 694), '{0}'.format(listdir()[hello[i]]))

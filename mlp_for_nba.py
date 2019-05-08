@@ -67,7 +67,6 @@ if __name__ == '__main__':
     rng_seed = 2 # set random number generator seed
     df = pd.read_csv('2016-17_advanced.csv')
     df = df[df['MP'] >= 1000]
-    df = df[df['Yr'] < 2019]
     df = df[df['Player_ID'] >= 0]
     # df = df[df['Player_ID'].duplicated()]
     df = df[df['Pos'] != 'PG']

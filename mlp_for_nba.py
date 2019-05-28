@@ -65,29 +65,51 @@ def print_output(model, y_train, y_test, rng_seed):
 
 if __name__ == '__main__':
     rng_seed = 2 # set random number generator seed
-    df = pd.read_csv('2016-17_advanced.csv')
-    df = df[df['MP'] >= 1000]
-    df = df[df['Player_ID'] >= 0]
-    # df = df[df['Player_ID'].duplicated()]
-    df = df[df['Pos'] != 'PG']
-    df = df[df['Pos'] != 'SG']
-    # df = df[df['Pos'] != 'SG']
-    df = df[df['Pos'] != 'SF']
-    df['Player_ID'] = df['Player_ID'].astype(int)
-    y = np.array(df['OBPM'].values)
-    pid = np.array(df['Player_ID'].values)
-    yr = np.array(df['Yr'].values)
-    images = []
-    for i in range(len(pid)):
-       images.append(cv2.imread('thumbnails/thumbnail_{0}_{1}-{2}.png'.format(pid[i], str(yr[i]-1), str(yr[i])[-2:]), 0))
-    X = np.array(images)
-    flat_exes = []
-    for i in range(len(X)):
-        flat_exes.append(X[i].flatten())
-    X = np.array(flat_exes)
-    X_train, y_train, X_test, y_test = load_and_condition_data() #, y_train_ohe = load_and_condition_data()
-    np.random.seed(rng_seed)
-    model = define_nn_mlp_model(X_train, y_train) #ohe
-    model.fit(X_train, y_train, epochs=12, batch_size=3, verbose=1,
-              validation_split=0.2) # cross val to estimate test error #ohe
-    # print_output(model, y_train, y_test, rng_seed)
+df = pd.read_csv('2016-17_advanced.csv')
+df = df.groupby('Player').min()
+df.reset_index(inplace=True)
+df = df[df['MP'] >= 500]
+df = df[df['Yr'] >= 2011]
+df = df[df['Age'] <= 23]
+df.reset_index(inplace=True, drop=True)
+df2 = pd.read_csv('2016-17_advanced.csv')
+grab1 = np.array(df['Player_ID'].values)
+grab2 = np.array(df['Yr'].values)
+
+cats = []
+
+for i in range(len(grab1)):
+    df_cat = df2[df2['Player_ID'] == grab1[i]]
+    cats.extend(df_cat[df_cat['Yr'] == grab2[i] + 4].index.values)
+
+df2 = df2.iloc[cats]
+df2.reset_index(inplace=True, drop=True)
+df = df[df['Player_ID'].isin(df2['Player_ID'].values)]
+df.reset_index(inplace=True, drop=True)
+df['Player_ID'] = df['Player_ID'].astype(int)
+
+# df3 = pd.read_csv('2016-17_advanced.csv')
+# df3 = df3[df3['MP'] >= 500]
+# df3 = df3[df3['Yr'] >= 2016]
+# df3 = df3[df3['Age'] <= 23]
+# df3 = df3[~df3['Player_ID'].isin(df['Player_ID'])].groupby('Player').min()
+# df3.reset_index(inplace=True)
+
+# df = df.append(df3, ignore_index=True)
+y = np.array(df2['OBPM'].values)
+pid = np.array(df['Player_ID'].values)
+yr = np.array(df['Yr'].values)
+images = []
+for i in range(len(pid)):
+    images.append(cv2.imread('thumbnails/thumbnail_{0}_{1}-{2}.png'.format(str(pid[i]), str(yr[i]-1), str(yr[i])[-2:]), 0))
+X = np.array(images)
+flat_exes = []
+for i in range(len(X)):
+    flat_exes.append(X[i].flatten())
+X = np.array(df[['OBPM', 'USG%']].values)
+X_train, y_train, X_test, y_test = load_and_condition_data() #, y_train_ohe = load_and_condition_data()
+np.random.seed(rng_seed)
+model = define_nn_mlp_model(X_train, y_train) #ohe
+model.fit(X_train, y_train, epochs=12, batch_size=3, verbose=1,
+          validation_split=0.2) # cross val to estimate test error #ohe
+# print_output(model, y_train, y_test, rng_seed)
